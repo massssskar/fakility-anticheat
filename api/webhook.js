@@ -1,32 +1,17 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Only POST allowed" });
+
+  const webhookURL = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookURL) return res.status(500).json({ error: "Webhook not set" });
 
   try {
-    const rawBody = req.body;
-    const body = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
-
-    const discordWebhook = "YOUR_DISCORD_WEBHOOK_URL_HERE";
-
-    const response = await fetch(discordWebhook, {
+    await fetch(webhookURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        embeds: body.embeds
-      }),
+      body: JSON.stringify(req.body)
     });
-
-    if (!response.ok) {
-      const err = await response.text();
-      console.error("Discord webhook error:", err);
-      return res.status(500).json({ error: "Failed to send to Discord" });
-    }
-
-    return res.status(200).json({ success: true });
-
+    res.status(200).json({ success: true });
   } catch (err) {
-    console.error("Error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: err.message });
   }
 }
