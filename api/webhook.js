@@ -1,13 +1,9 @@
-local HttpService = game:GetService("HttpService")
-local webhookURL = "https://fakility-anticheat.vercel.app/api/webhook"
-
-local function sendEmbed(title, description, color)
-    local data = {
-        title = title,
-        description = description,
-        color = color or 16711680
+export default function handler(req, res) {
+    if (req.method === 'POST') {
+        const data = req.body;
+        console.log("Received webhook:", data);
+        res.status(200).json({ success: true });
+    } else {
+        res.status(405).json({ error: "Method not allowed" });
     }
-
-    local jsonData = HttpService:JSONEncode(data)
-    HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
-end
+}
